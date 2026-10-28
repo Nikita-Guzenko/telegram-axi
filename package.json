@@ -1,0 +1,50 @@
+{
+  "name": "telegram-axi",
+  "version": "1.0.0",
+  "description": "Agent eXperience Interface (AXI) for Telegram Bot API. High-density, token-efficient CLI for AI agents.",
+  "type": "module",
+  "bin": {
+    "telegram-axi": "./dist/bin/telegram-axi.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc && chmod +x dist/bin/telegram-axi.js",
+    "test": "npx tsx test/smoke.test.ts",
+    "dev": "tsc -w"
+  },
+  "dependencies": {
+    "axi-sdk-js": "^0.1.13",
+    "@toon-format/toon": "^2.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "@types/node": "^22.0.0"
+  },
+  "author": "Nikita Guzenko <nguzen@gmail.com> (https://x.com/NikGuzenko)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nikita-Guzenko/telegram-axi.git"
+  },
+  "homepage": "https://github.com/Nikita-Guzenko/telegram-axi#readme",
+  "bugs": {
+    "url": "https://github.com/Nikita-Guzenko/telegram-axi/issues"
+  },
+  "keywords": [
+    "axi",
+    "telegram",
+    "telegram-bot",
+    "telegram-bot-api",
+    "cli",
+    "agent",
+    "toon",
+    "ai-agent",
+    "token-efficient"
+  ]
+}
