@@ -1,6 +1,6 @@
 {
   "name": "telegram-axi",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Agent eXperience Interface (AXI) for Telegram Bot API. High-density, token-efficient CLI for AI agents.",
   "type": "module",
   "bin": {

@@ -919,12 +919,61 @@ const setupCommand: AxiCliCommand<undefined> = async (args) => {
   };
 };
 
+// Per-command `--help` (NIK-462, 5 Nov 2026): before this, `send --help` ran the command and failed with
+// "Missing --chat or --text", so agents learned photo/doc sending only from ~/.claude/rules/telegram-axi.md.
+// Each line below is the usage string the command itself prints on bad flags; keep them in step.
+const COMMAND_HELP: Record<string, string> = {
+  send: [
+    "usage:",
+    "  telegram-axi send --chat <id> --text 'Your message' [--format HTML|MarkdownV2] [--silent] [--reply <msg_id>]",
+    "  telegram-axi send photo --chat <id> --photo <path_or_url> [--caption '...']",
+    "  telegram-axi send doc --chat <id> --file <path_or_url> [--caption '...']",
+    "other media (video, audio, voice, poll, location): telegram-axi api <method> --param value (see `telegram-axi catalog`)",
+    "",
+  ].join("\n"),
+  msg: [
+    "usage:",
+    "  telegram-axi msg edit --chat <id> --msg <id> --text 'New text'",
+    "  telegram-axi msg delete --chat <id> --msg <id>",
+    "  telegram-axi msg pin --chat <id> --msg <id> [--silent]",
+    "  telegram-axi msg unpin --chat <id> [--msg <id>]",
+    "  telegram-axi msg react --chat <id> --msg <id> --emoji '👍'",
+    "  telegram-axi msg forward --to <chat_id> --from <chat_id> --msg <id>",
+    "",
+  ].join("\n"),
+  chat: [
+    "usage:",
+    "  telegram-axi chat info|admins|count|link <chat_id>",
+    "  telegram-axi chat ban|unban <chat_id> --user <user_id>",
+    "",
+  ].join("\n"),
+  webhook: [
+    "usage:",
+    "  telegram-axi webhook info",
+    "  telegram-axi webhook set https://example.com/tg-webhook [--secret <token>]",
+    "  telegram-axi webhook delete",
+    "",
+  ].join("\n"),
+  updates: "usage:\n  telegram-axi updates [--limit 10] [--offset <next_offset>] [--timeout <s>]\n  --offset acknowledges earlier updates; the output prints the next offset\n",
+  commands: "usage:\n  telegram-axi commands list\n  telegram-axi commands set --commands '[{\"command\":\"start\",\"description\":\"Start bot\"}]'\n",
+  api: "usage:\n  telegram-axi api <method> [--data '<json>'] [--param value...]\n  find a method: telegram-axi catalog [category] · telegram-axi inspect <method>\n",
+  configure: "usage:\n  telegram-axi configure show\n  telegram-axi configure set --token <token> [--chat <id>]\ncredentials: TELEGRAM_BOT_TOKEN env wins over ~/.config/telegram-axi/config.json\n",
+  catalog: "usage:\n  telegram-axi catalog [category]   all Bot API categories, or the methods of one\n",
+  inspect: "usage:\n  telegram-axi inspect <method>     required and optional parameters, return type, example\n",
+  me: "usage:\n  telegram-axi me                   bot identity, description, rights and menu commands\n",
+  setup: "usage:\n  telegram-axi setup hooks          install the SessionStart hook for Claude Code, Codex, OpenCode\n",
+};
+COMMAND_HELP.message = COMMAND_HELP.msg;
+COMMAND_HELP.call = COMMAND_HELP.api;
+COMMAND_HELP.capabilities = COMMAND_HELP.catalog;
+
 export async function main() {
   await runAxiCli({
     description: "Agent eXperience Interface for Telegram Bot API. Compact token-efficient CLI for AI agents.",
     version: VERSION,
     argv: process.argv.slice(2),
     topLevelHelp: TOP_LEVEL_HELP,
+    getCommandHelp: (command) => COMMAND_HELP[command],
     home: homeCommand,
     commands: {
       catalog: catalogCommand,
