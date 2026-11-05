@@ -37,3 +37,17 @@ test("missing required flags exit with non-zero and structured error", () => {
     assert.match(err.stdout.toString(), /code:\s*INVALID_ARGS/);
   }
 });
+
+test("send --help prints text, photo and doc usage and does not send (NIK-462)", () => {
+  const output = execSync(`${binPath} send --help`, { encoding: "utf-8" });
+  assert.match(output, /send --chat <id> --text/);
+  assert.match(output, /send photo --chat <id> --photo/);
+  assert.match(output, /send doc --chat <id> --file/);
+});
+
+test("every command with subcommands has its own --help", () => {
+  for (const cmd of ["msg", "chat", "webhook", "updates", "commands", "api", "configure"]) {
+    const output = execSync(`${binPath} ${cmd} --help`, { encoding: "utf-8" });
+    assert.match(output, /^usage:/m, cmd);
+  }
+});
