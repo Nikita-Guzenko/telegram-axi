@@ -13,20 +13,22 @@ export interface TelegramAxiConfig {
 export function loadConfig(): TelegramAxiConfig {
   const config: TelegramAxiConfig = {};
 
+  // 0. NIK-498 (7 Nov 2026): TELEGRAM_AXI_TOKEN from the Master Vault (~/.config/vault/master.env)
+  //    wins over the config file, so the vault is the single source and a stale file cannot override it.
+  if (process.env.TELEGRAM_AXI_TOKEN) config.token = process.env.TELEGRAM_AXI_TOKEN;
+
   // 1. Direct config file (configured via `telegram-axi configure set`)
   try {
     if (existsSync(CONFIG_FILE)) {
       const parsed = JSON.parse(readFileSync(CONFIG_FILE, "utf-8"));
-      if (parsed.token) config.token = parsed.token;
+      if (parsed.token && !config.token) config.token = parsed.token;
       if (parsed.defaultChatId) config.defaultChatId = parsed.defaultChatId;
     }
   } catch {}
 
   // 2. If not explicitly set in config file, check environment variables
   if (!config.token) {
-    if (process.env.TELEGRAM_AXI_TOKEN) {
-      config.token = process.env.TELEGRAM_AXI_TOKEN;
-    } else if (process.env.TELEGRAM_BOT_TOKEN) {
+    if (process.env.TELEGRAM_BOT_TOKEN) {
       config.token = process.env.TELEGRAM_BOT_TOKEN;
     }
   }
@@ -60,7 +62,12 @@ export function loadConfig(): TelegramAxiConfig {
 }
 
 export function saveConfig(updates: Partial<TelegramAxiConfig>): TelegramAxiConfig {
-  const current = loadConfig();
+  // NIK-498 (7 Nov 2026): start from the file only, never from loadConfig(); else a token that came
+  // from the vault env would be copied into config.json and the vault would stop being the single source.
+  let current: TelegramAxiConfig = {};
+  try {
+    if (existsSync(CONFIG_FILE)) current = JSON.parse(readFileSync(CONFIG_FILE, "utf-8"));
+  } catch {}
   const merged: TelegramAxiConfig = { ...current, ...updates };
 
   if (!existsSync(CONFIG_DIR)) {
